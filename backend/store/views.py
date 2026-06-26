@@ -5,13 +5,20 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.contrib.auth.models import User
 from .serializers import RegisterSerializer, UserSerializer
 from rest_framework import status
+from rest_framework import generics
+from rest_framework.pagination import LimitOffsetPagination
 from .models import Product, Category, Cart, CartItem, Order, OrderItem
 from .serializers import ProductSerializer, CategorySerializer, CartSerializer, CartItemSerializer
 
 @api_view(['GET'])
 def get_products(request):
     products = Product.objects.all()
-    serializer = ProductSerializer(products, many=True)
+    paginator = LimitOffsetPagination()
+    page = paginator.paginate_queryset(products, request)
+    if page is not None:
+        serializer = ProductSerializer(page, many=True, context={'request': request})
+        return paginator.get_paginated_response(serializer.data)
+    serializer = ProductSerializer(products, many=True, context={'request': request})
     return Response(serializer.data)
 
 @api_view(['GET'])
@@ -108,24 +115,30 @@ def register_view(request):
     serializer = RegisterSerializer(data=request.data)
     if serializer.is_valid():
         user = serializer.save()
-        return Response({"message": "User created successfully", "user": UserSerializer(user).data}, status=status.HTTP_201_CREATED)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST) 
+        return Response({
+            "status": 200,
+            "success": True,
+            "message": "User created successfully",
+            "data": UserSerializer(user).data
+        }, status=status.HTTP_200_OK) # Changed HTTP status to 200 to match response body
+    
+    return Response({
+        "status": 400,
+        "success": False,
+        "message": "Validation failed",
+        "data": serializer.errors
+    }, status=status.HTTP_400_BAD_REQUEST)
 
 
 
 
 
 #CLASS VIEW
-class ProductListView(APIView):
+class ProductListView(generics.ListAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
     permission_classes = [AllowAny]
-    def get(self, request):
-        products = Product.objects.all()
-        serializer = ProductSerializer(
-            products,
-            many=True,
-            context={"request": request}
-        )
-        return Response(serializer.data)
+    pagination_class = LimitOffsetPagination
 
 
 class ProductDetailView(APIView):

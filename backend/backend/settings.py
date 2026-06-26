@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'store',
+    'drf_spectacular',
 ]
 
 MIDDLEWARE = [
@@ -137,6 +138,9 @@ REST_FRAMEWORK={
     'DEFAULT_PERMISSION_CLASSES':(
         'rest_framework.permissions.AllowAny',
     ),
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 10,
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
 SIMPLE_JWT={

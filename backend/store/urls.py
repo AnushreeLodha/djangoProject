@@ -12,6 +12,7 @@ from .views import (
     UpdateCartQuantityView,
     CreateOrderView,
 )
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 urlpatterns = [
     path("register/", RegisterView.as_view()),
@@ -25,6 +26,8 @@ urlpatterns = [
     path("cart/remove/", RemoveFromCartView.as_view()),
     path("cart/update/", UpdateCartQuantityView.as_view()),
     path("orders/create/", CreateOrderView.as_view()),
+    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
 ]
 
 
@@ -41,4 +44,6 @@ urlpatterns = [
   path('cart/remove/', views.remove_from_cart),
   path('cart/update/', views.update_cart_quantity),
   path('orders/create/', views.create_order),
+  path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+  path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
 ]
